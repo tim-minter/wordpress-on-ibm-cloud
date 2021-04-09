@@ -67,7 +67,8 @@ helm install --set service.type=ClusterIP --set ingress.enabled=true --set ingre
 Note: There are some useful extra options you can add to this hel command
 ```--set memcached.enabled=true ``` this sets up the w3 Super Cache plugin and would be highly recommeded
 
-```--set allowOverrideNone=false ``` these two made the .htaccess file peristsnt and editiable by plugins. See here for more into and if you should do this or not https://docs.bitnami.com/kubernetes/apps/wordpress/configuration/understand-htaccess/
+These two make the .htaccess file persistent and editiable by plugins. See here for more into and if you should do this or not https://docs.bitnami.com/kubernetes/apps/wordpress/configuration/understand-htaccess/
+```--set allowOverrideNone=false ``` 
 ```--set htaccessPersistenceEnabled=true``` 
 
 Note: Stuffed up your installation and can't log on etc? Just issue ```helm uninstall wordpress```, delete the Persistant Volume Claim for the mariadb and then issue the comand above again.... that's it!

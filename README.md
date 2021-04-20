@@ -1,14 +1,17 @@
 # Installing Wordpress on IBM Cloud with NGINX and SSL (low cost method)
 
-First thing's first. This is an "inbetween" solution to get Wordpress up and running with SSL and good performance. A large scale (and scalable) Production version is going ot be more complex. This is how this solution compares: 
+First thing's first. This is an "inbetween" solution to get Wordpress up and running with SSL and good performance. A large scale (and scalable) production version is going to be more complex. This is how this solution compares: 
 
 Feature| Basic | This solution | Production Requirements |
 | --- | --- | --- | --- |
 | Wordpress up and running | Yes | Yes | Yes |
 | Secure connection from browser (SSL) | No | Yes | Yes |
-| Database | Local low performance | Local low performance | Managed High performance Databaase |
-| Scalable | No | No | Yes|
+| Database | Local low performance | Local low performance* | Managed High performance Databaase |
+| Scalable | No | No* | Yes|
 | Caching (required to handle any decent load) | No | Yes | Yes |
+| Proper High availability | No | No | Yes |
+
+* both of these features can be added to this solution manually
 
 Wordpress with NGINX and SSL is available in the IBM Cloud catalogue however from experience it may be easier to create an equivelenet Wordpress instance yourself. If you search for Wordpress SSL in the cloud catalogue you'll be presented with a setup page that requires a Virtual Machine cluster and a separate Virtual Machine. That is some significant infrasturcture and may be out of your price range especially if you are just after a production ready Wordpress instance for your business. For you business site you will certainly need SSL.
 

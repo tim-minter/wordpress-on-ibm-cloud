@@ -146,12 +146,12 @@ spec:
 
 Save and close.
 
-## Change the file upload size limit
-Via the Kubernetes dashboard go to Ingresses under the Service section and locate the wordpress ingress. Edit the ingress and add the following two lines to the annotations section.
+16. By default the file upload limit of the ingrees probably wont be suffient which will mean you get errors when you upload anything over that limit (even though the upload limit you can see in the Wordpress dashboard will be 40Mb or simialr) To change the file upload size limit go to your Kubernetes dashboard and then go to Ingresses under the Service section and locate the wordpress ingress. Edit the ingress and add the following two lines to the annotations section.
 
 ```nginx.ingress.kubernetes.io/proxy-body-size: 100m
 nginx.org/client-max-body-size: 100m```
 
+eg.
 ```apiVersion: extensions/v1beta1
 kind: Ingress
 metadata:

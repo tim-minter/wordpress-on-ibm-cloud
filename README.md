@@ -99,8 +99,14 @@ Note: Stuffed up your installation and can't log on etc? Just issue ```helm unin
 14. Here we leave the Bitnami documentation. If your DNS update has taken effect, you should be able to connect to your wordpress instance via your domain name now. You'll notice you have a secure connection.
 15. The cert-manager will go off to the Let's Encrypt service and generate SSL certificates for you and then manage them for you! If your DNS update hasn't taken effect yet, cert-manager can't go and make that request and you'll see an extra pod running in your Kubernetes dashboard until it can go and do this.
 16. When this all completes you should be able to access wordpress via your domain name. It may take a while for this complete.
-17. Now, lathough the W3 Total Cache plugin will be installed, it will be complianing that it can't edit the wp-content.php file. This is expected beacuse the file is read only. It would also be expected that as Wordpress is running in a container, that file is "immutable". Fortunately using the --set htaccessPersistenceEnabled=true setting in the wordpress install above the folder this file is in is stored in persistant storge! So we can edit and save it without any fancy Kubernetes work.
-
+17. Now, although the W3 Total Cache plugin will be installed, it will be complianing that it can't edit the wp-content.php file. This is expected beacuse the file is read only. It would also be expected that as Wordpress is running in a container, that file is "immutable". Fortunately using the --set htaccessPersistenceEnabled=true setting in the wordpress install above the folder this file is in is stored in persistant storge! So we can edit and save it without any fancy Kubernetes work. To edit that file locate the worpdress pod in your Kubernetes dashboard then click the 3 dots to thr ight of it and select Exec. This open a session inside the pod. Issue the following command to madke the wp-content-php file writable 
+```
+chmod 660 /bitnai/wordpress/wp-config.php
+```
+When done remeber to set it back to just writable again
+```
+chmod 640 /bitnai/wordpress/wp-config.php
+```
 Now what about if you want to be able to connect your Wordpress instance using www.mydomain.com as well as mydomain.com. This is a common requirement. Searching for this on the internet will return a lot of scary looking processes but in this case, basically nginx and cert-manager take care of this, you just need to add a few lines to the ingress definition....
 
 In your Kubernetes Dashboard in IBM Cloud go to the Ingresses menu under Service. Edit the wordpress ingress. Under the Spec section you will see something like this...

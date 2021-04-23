@@ -95,6 +95,54 @@ Note: Stuffed up your installation and can't log on etc? Just issue ```helm unin
 14. Here we leave the Bitnami documentation. If your DNS update has taken effect, you should be able to connect to your wordpress instance via your domain name now. You'll notice you have a secure connection.
 15. The cert-manager will go off to the Let's Encrypt service and generate SSL certificates for you and then manage them for you! If your DNS update hasn't taken effect yet, cert-manager can't go and make that request and you'll see an extra pod running in your Kubernetes dashboard until it can go and do this.
 
-Now what about if you want to be able to connect your Wordpress instance using www.mydomain.com as well as mydomain.com. This is a common requirement. Searching for this on the interner will return a lot of scary looking processes but in this case, basically nginx and cert-manager take care of this, you just need to add a few lines to the ingress definition....
+Now what about if you want to be able to connect your Wordpress instance using www.mydomain.com as well as mydomain.com. This is a common requirement. Searching for this on the internet will return a lot of scary looking processes but in this case, basically nginx and cert-manager take care of this, you just need to add a few lines to the ingress definition....
 
+In your Kubernetes Dashboard in IBM Cloud go to the Ingresses menu under Service. Edit the wordpress ingress. Under the Spec section you will see something like this...
+
+```
+spec:
+  tls:
+    - hosts:
+        - mydomain.co.uk
+      secretName: wordpress.local-tls
+  rules:
+    - host: mydomain.co.uk
+      http:
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+            backend:
+              serviceName: wordpress
+              servicePort: http
+```
+
+to add the "www" version of your domain chnage it to this kind for format...
+
+```
+spec:
+  tls:
+    - hosts:
+        - www.mydomain.co.uk
+        - mydomain.co.uk
+      secretName: wordpress.local-tls
+  rules:
+    - host: www.mydomain.co.uk
+      http:
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+            backend:
+              serviceName: wordpress
+              servicePort: http
+    - host: mydomain.co.uk
+      http:
+        paths:
+          - path: /
+            pathType: ImplementationSpecific
+            backend:
+              serviceName: wordpress
+              servicePort: http
+```
+
+Save and close.
 [in progress]

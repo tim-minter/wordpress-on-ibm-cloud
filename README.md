@@ -81,10 +81,12 @@ helm install cert-manager --namespace cert-manager jetstack/cert-manager --versi
 ```
 13. Install WordPress using Bitnami's Helm chart with additional parameters to integrate with Ingress and cert-manager. Replace the YOURDOMAIN placeholder with your domain name. Here I have added a parameter to point the storage class at the correct IBM Storage Class (that was installed by the Block Storage Plugin earlier)
 ```
-helm install --set service.type=ClusterIP --set ingress.enabled=true --set ingress.certManager=true --set ingress.annotations."kubernetes\.io/ingress\.class"=nginx --set ingress.annotations."cert-manager\.io/cluster-issuer"=letsencrypt-prod --set ingress.hostname=YOURDOMAIN --set ingress.extraTls[0].hosts[0]=YOURDOMAIN --set ingress.extraTls[0].secretName=wordpress.local-tls --set global.storageClass=ibmc-block-gold --set memcached.enabled=true --set allowOverrideNone=false --set htaccessPersistenceEnabled=true wordpress bitnami/wordpress
+helm install --set service.type=ClusterIP --set ingress.enabled=true --set ingress.certManager=true --set ingress.annotations."kubernetes\.io/ingress\.class"=nginx --set ingress.annotations."cert-manager\.io/cluster-issuer"=letsencrypt-prod --set ingress.hostname=YOURDOMAIN --set ingress.extraTls[0].hosts[0]=YOURDOMAIN --set ingress.extraTls[0].secretName=wordpress.local-tls --set global.storageClass=ibmc-block-gold --set memcached.enabled=true --set allowOverrideNone=true wordpress bitnami/wordpress
 ```
-Note: There are some useful extra options you can add to this hel command
-```--set memcached.enabled=true ``` this sets up the w3 Super Cache plugin and would be highly recommeded. Info here https://docs.bitnami.com/aws/apps/wordpress/troubleshooting/optimize-bitnami-wordpress/
+Note: There are some useful extra options you can add to this helm command
+```--set memcached.enabled=true ```
+```--set allowOverrideNone=true ```
+this sets up the w3 Super Cache plugin and would be highly recommeded. More info: https://docs.bitnami.com/kubernetes/apps/wordpress/configuration/understand-htaccess/
 
 These two make the .htaccess file persistent and editiable by plugins. See here for more into and if you should do this or not https://docs.bitnami.com/kubernetes/apps/wordpress/configuration/understand-htaccess/
 ```--set allowOverrideNone=false ``` 

@@ -145,4 +145,35 @@ spec:
 ```
 
 Save and close.
-[in progress]
+
+## Change the file upload size limit
+Via the Kubernetes dashboard go to Ingresses under the Service section and locate the wordpress ingress. Edit the ingress and add the following two lines to the annotations section.
+
+```nginx.ingress.kubernetes.io/proxy-body-size: 100m
+nginx.org/client-max-body-size: 100m```
+
+```apiVersion: extensions/v1beta1
+kind: Ingress
+metadata:
+  name: <RESOURCE_NAME>
+  annotations:
+    kubernetes.io/ingress.class: 'nginx'
+    kubernetes.io/tls-acme: 'true'
+    cert-manager.io/cluster-issuer: letsencrypt-prod
+    ingress.kubernetes.io/rewrite-target: /
+    nginx.ingress.kubernetes.io/proxy-body-size: 100m
+    nginx.org/client-max-body-size: 100m
+spec:
+  tls:
+  - hosts:
+    - <HTTPS_HOSTNAME>
+    secretName:  <RESOURCE_NAME>
+  rules:
+  - host: <HTTPS_HOSTNAME>
+    http:
+      paths:
+      - backend:
+          serviceName: <BAKCEND_SERVICE_NAME>
+          servicePort: <BACKEND_SERVICE_PORT>
+        path: /
+   ```     

@@ -12,6 +12,7 @@ Feature| Basic | This solution | Production Requirements |
 | Proper High availability | No | No | Yes |
 | Min CPU requirements | 4 | 6 | Depends |
 | Min memory requirements | 8Gb | 12Gb | Depends |
+| Number of worker nodes | 2 (2 CPU 4GB RAM Each) | 3 (2 CPU 4GB RAM Each) | 3 (Depends) |
 
 "*" both of these features can be added to/upgraded with this solution manually
 It is possible to install wordpress on IBM Cloud on a one node cluster. The min spec seems to be 8CPU and 32Gb RAM.

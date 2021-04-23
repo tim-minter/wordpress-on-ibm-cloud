@@ -28,12 +28,12 @@ The first thing to note is that this service is provisioned on top of Kubernetes
 
 1. Log in to cloud.ibm.com or create your account
 2. You'll need a pay as you go account to provision servers so you'll need to upgrade by entering your card details. When you come to create your "cluster" you'll be asked to upgrade there if you haven't aleady done so.
-3. Ignore the Wordpress offerings in the catalogue and instead create a Kubernetes cluster
-4. Add the IBM Block Storage plugin to your cluster
+3. Ignore the Wordpress offerings in the catalogue and instead create a Kubernetes cluster on Classic infrastructure.
+4. Add the IBM Block Storage plugin to your cluster (type block in the search field and select IBM Block Storage Plugin, select your cluster and click Create)
 5. Connect from your command line/terminal to your cluster as described in the Access page of the cluster you created
-6. Install helm and the IBM Cloud Command line tool
+6. Install helm and the IBM Cloud Command line tool, if you haven't already done this (one time process)
 
-The following steps 8 to are taken fomr the Bitnami documentation here https://docs.bitnami.com/tutorials/secure-wordpress-kubernetes-managed-database-ssl-upgrades/
+The following steps 8 to 13 are taken from, or modified from the Bitnami documentation here https://docs.bitnami.com/tutorials/secure-wordpress-kubernetes-managed-database-ssl-upgrades/ 
 
 8. Install the NGINX ingress controller
 ```
@@ -96,6 +96,8 @@ Note: Stuffed up your installation and can't log on etc? Just issue ```helm unin
 
 14. Here we leave the Bitnami documentation. If your DNS update has taken effect, you should be able to connect to your wordpress instance via your domain name now. You'll notice you have a secure connection.
 15. The cert-manager will go off to the Let's Encrypt service and generate SSL certificates for you and then manage them for you! If your DNS update hasn't taken effect yet, cert-manager can't go and make that request and you'll see an extra pod running in your Kubernetes dashboard until it can go and do this.
+16. When this all completes you should be able to access wordpress via your domain name. It may take a while for this complete.
+17. Now, lathough the W3 Total Cache plugin will be installed, it will be complianing that it can't edit the wp-content.php file. This is expected beacuse the file is read only. It would also be expected that as Wordpress is running in a container, that file is "immutable". Fortunately using the --set htaccessPersistenceEnabled=true setting in the wordpress install above the folder this file is in is stored in persistant storge! So we can edit and save it without any fancy Kubernetes work.
 
 Now what about if you want to be able to connect your Wordpress instance using www.mydomain.com as well as mydomain.com. This is a common requirement. Searching for this on the internet will return a lot of scary looking processes but in this case, basically nginx and cert-manager take care of this, you just need to add a few lines to the ingress definition....
 
@@ -148,7 +150,7 @@ spec:
 
 Save and close.
 
-16. By default the file upload limit of the ingrees probably wont be suffient which will mean you get errors when you upload anything over that limit (even though the upload limit you can see in the Wordpress dashboard will be 40Mb or simialr) To change the file upload size limit go to your Kubernetes dashboard and then go to Ingresses under the Service section and locate the wordpress ingress. Edit the ingress and add the following two lines to the annotations section.
+By default the file upload limit of the ingrees probably wont be suffient which will mean you get errors when you upload anything over that limit (even though the upload limit you can see in the Wordpress dashboard will be 40Mb or simialr) To change the file upload size limit go to your Kubernetes dashboard and then go to Ingresses under the Service section and locate the wordpress ingress. Edit the ingress and add the following two lines to the annotations section.
 
 ```
 nginx.ingress.kubernetes.io/proxy-body-size: 100m

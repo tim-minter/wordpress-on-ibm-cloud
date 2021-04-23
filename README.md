@@ -6,16 +6,16 @@ Feature| Basic | This solution | Production Requirements |
 | --- | --- | --- | --- |
 | Wordpress up and running | Yes | Yes | Yes |
 | Secure connection from browser (SSL) | No | Yes | Yes |
-| Database | Local low performance | Local low performance* | Managed High performance Databaase |
-| Scalable | No | No* | Yes|
+| Database | Local low performance | Local low performance (1) | Managed High performance Databaase |
+| Scalable | No | No (1) | Yes|
 | Caching (required to handle any decent load) | No | Yes | Yes |
 | Proper High availability | No | No | Yes |
 | Min CPU requirements | 4 | 6 | Depends |
 | Min memory requirements | 8Gb | 12Gb | Depends |
-| Number of worker nodes | 2 (2 CPU 4GB RAM Each) | 3 (2 CPU 4GB RAM Each) | 3 (Depends) |
+| Number of worker nodes(2) | 2 (2 CPU 4GB RAM Each) | 3 (2 CPU 4GB RAM Each) | 3 (Depends) |
 
-"*" both of these features can be added to/upgraded with this solution manually
-It is possible to install wordpress on IBM Cloud on a one node cluster. The min spec seems to be 8CPU and 32Gb RAM.
+(1) both of these features can be added to/upgraded with this solution manually.
+(2) It is possible to install wordpress on IBM Cloud on a one node cluster. The min spec seems to be 8CPU and 32Gb RAM.
 
 
 Wordpress with NGINX and SSL is available in the IBM Cloud catalogue however from experience it may be easier to create an equivelenet Wordpress instance yourself. If you search for Wordpress SSL in the cloud catalogue you'll be presented with a setup page that requires a Virtual Machine cluster and a separate Virtual Machine. That is some significant infrasturcture and may be out of your price range especially if you are just after a production ready Wordpress instance for your business. For you business site you will certainly need SSL.

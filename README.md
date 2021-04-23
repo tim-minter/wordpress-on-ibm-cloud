@@ -15,7 +15,7 @@ Feature| Basic | This solution | Production Requirements |
 | Number of worker nodes(2) | 2 (2 CPU 4GB RAM Each) | 3 (2 CPU 4GB RAM Each) | 3 (Depends) |
 
 (1) both of these features can be added to/upgraded with this solution manually.
-(2) It is possible to install wordpress on IBM Cloud on a one node cluster. The min spec seems to be 8CPU and 32Gb RAM.
+(2) It is possible to install wordpress on IBM Cloud on a one node cluster. The min spec seems to be 8CPU and 32Gb RAM. If you do this, you'll need to scale down a number of deployments to 1. Check for failed deployments in the Kubernetes Dashboard 
 
 
 Wordpress with NGINX and SSL is available in the IBM Cloud catalogue however from experience it may be easier to create an equivelenet Wordpress instance yourself. If you search for Wordpress SSL in the cloud catalogue you'll be presented with a setup page that requires a Virtual Machine cluster and a separate Virtual Machine. That is some significant infrasturcture and may be out of your price range especially if you are just after a production ready Wordpress instance for your business. For you business site you will certainly need SSL.

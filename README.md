@@ -101,11 +101,11 @@ Note: Stuffed up your installation and can't log on etc? Just issue ```helm unin
 16. When this all completes you should be able to access Wordpress via your domain name. It may take a while for this complete.
 17. Now, although the W3 Total Cache plugin will be installed, it will be complaining that it can't edit the wp-content.php file. This is expected because the file is read only. It would also be expected that as Wordpress is running in a container, that file is "immutable". Fortunately using the --set htaccessPersistenceEnabled=true setting in the Wordpress install above the folder this file is in is stored in persistent storge! So we can edit and save it without any fancy Kubernetes work. To edit that file locate the Wordpress pod in your Kubernetes dashboard then click the 3 dots to the right of it and select Exec. This open a session inside the pod. Issue the following command to make the wp-content-php file writable 
 ```
-chmod 660 /bitnai/wordpress/wp-config.php
+chmod 660 /bitnami/wordpress/wp-config.php
 ```
 When done remember to set it back to just writable again
 ```
-chmod 640 /bitnai/wordpress/wp-config.php
+chmod 755 /bitnami/wordpress/wp-config.php
 ```
 Now what about if you want to be able to connect your Wordpress instance using www.mydomain.com as well as mydomain.com. This is a common requirement. Searching for this on the internet will return a lot of scary looking processes but in this case, basically nginx and cert-manager take care of this, you just need to add a few lines to the ingress definition....
 

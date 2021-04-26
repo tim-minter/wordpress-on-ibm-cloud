@@ -83,11 +83,10 @@ helm install cert-manager --namespace cert-manager jetstack/cert-manager --versi
 ```
 helm install --set service.type=ClusterIP --set ingress.enabled=true --set ingress.certManager=true --set ingress.annotations."kubernetes\.io/ingress\.class"=nginx --set ingress.annotations."cert-manager\.io/cluster-issuer"=letsencrypt-prod --set ingress.hostname=YOURDOMAIN --set ingress.extraTls[0].hosts[0]=YOURDOMAIN --set ingress.extraTls[0].secretName=wordpress.local-tls --set global.storageClass=ibmc-block-gold --set wordpressConfigureCache=true --set memcached.enabled=true --set allowOverrideNone=true --set htaccessPersistenceEnabled=true wordpress bitnami/wordpress
 ```
-Note: There are some useful extra options you can add to this helm command
+Note: Setting the below options turns on db caching and install the w3 totalcache plugin using memcache which is highly recomended. See https://github.com/bitnami/charts/tree/master/bitnami/wordpress
 ```
 --set memcached.enabled=true
 --set wordpressConfigureCache=true
---set allowOverrideNone=true 
 ```
 
 ```--set htaccessPersistenceEnabled=true``` 

@@ -1,20 +1,17 @@
 # Installing Wordpress on IBM Cloud with NGINX and SSL (low cost method)
 
+First thing's first. This is a solution to get Wordpress up and running with SSL and the ability to scale. That is pretty much what you need for a production ready system but I'm not suggesting this is an enterprise grade production version. I'd call this a minimum viable production version. Better than you get out of the box in two huge ways - SSL and scalability). An enterprise production version would be more complex and involve high availability archicture via globally dispursed infrastrucure and a load ballancer solution. 
 
-NOTE - As of 26/4/2021 I'm updatng this to include scaling with NFS. Please check back later.
+I think this is great solution that allows you to start with one Wordpress node and scale horizontally by adding more nodes when you need/can afford.
 
-The instcutions below are currently in flux so best not t0 use them!
+This is how this solution compares: 
 
------------
-
-First thing's first. This is an "in-between" solution to get Wordpress up and running with SSL and good performance. A large scale (and scalable) production version is going to be more complex. This is how this solution compares: 
-
-Feature| Basic | This solution | Production Requirements |
+Feature| Basic | This solution | Enterprise Production Requirements |
 | --- | --- | --- | --- |
 | Wordpress up and running | Yes | Yes | Yes |
 | Secure connection from browser (SSL) | No | Yes | Yes |
 | Database | Local low performance | Local low performance (1) | Managed High performance Database |
-| Scalable | No | No (1) | Yes|
+| Scalable | No | Yes | Yes|
 | Caching (required to handle any decent load) | No | Yes | Yes |
 | Proper High availability | No | No | Yes |
 | Min CPU requirements | 4 | 6 | Depends |
@@ -22,7 +19,7 @@ Feature| Basic | This solution | Production Requirements |
 | Number of worker nodes(2) | 2 (2 CPU 4GB RAM Each) | 3 (2 CPU 4GB RAM Each). | 3 (Depends) |
 
 (1) both of these features can be added to/upgraded with this solution manually.
-(2) It is possible to install Wordpress on IBM Cloud on a one node cluster. The min spec for this solution seems to be 4CPU and 32Gb RAM. If you do this, you'll need to scale down a number of deployments to 1. Check for failed deployments in the Kubernetes Dashboard 
+(2) It is possible to install Wordpress on IBM Cloud on a one node cluster and it runs fine using the instuction below but you can't scale it horizontally of course but it dosn' mean you can start with one node and then another, and so on. Great for getting started with min cost and then scaling up! The min spec for this solution seems to be 4CPU and 32Gb RAM. If you do this, you'll need to scale down a number of deployments to 1. Check for failed deployments in the Kubernetes Dashboard 
 
 
 Wordpress with NGINX and SSL is available in the IBM Cloud catalogue however from experience it may be easier to create an equivalent Wordpress instance yourself. If you search for Wordpress SSL in the cloud catalogue you'll be presented with a setup page that requires a Virtual Machine cluster and a separate Virtual Machine. That is some significant infrastructure and may be out of your price range especially if you are just after a production ready Wordpress instance for your business. For you business site you will certainly need SSL.
@@ -86,8 +83,26 @@ kubectl apply -f letsencrypt-prod.yaml
 ```
 helm install cert-manager --namespace cert-manager jetstack/cert-manager --version v0.14.1
 ```
-13. Install NFS - [in progress - requird for rest of instructions] 
-14. Install WordPress using Bitnami's Helm chart with additional parameters to integrate with Ingress and cert-manager. Replace the YOURDOMAIN placeholder with your domain name. The ciritical difference between this and the Bitnami docs is I have added a parameter to point the correct block storage class (ReadWriteOnce) and correct file storage class (ReadWriteMany) and set the access modes correctly to allow scaling.
+13. Install NFS server
+
+Create a file called values.yaml. Paste the following into the file and save.
+```
+persistence:
+  enabled: true
+  storageClass: "ibmc-block-gold"
+  size: 20Gi
+
+storageClass:
+  defaultClass: true
+```
+Issue the following commands to create the nfs server on your cluster
+
+```
+helm repo add wso2 https://helm.wso2.com
+helm install stable/nfs-server-provisioner -f values.yaml --generate-name
+
+```
+15. Install WordPress using Bitnami's Helm chart with additional parameters to integrate with Ingress and cert-manager. Replace the YOURDOMAIN placeholder with your domain name. The ciritical difference between this and the Bitnami docs is it has settings to use the nfs storage class created above. A ReadWriteMany storage optipn (like NFS) is required to enable scaling.
 ```
 helm install --set service.type=ClusterIP --set ingress.enabled=true --set ingress.certManager=true --set ingress.annotations."kubernetes\.io/ingress\.class"=nginx --set ingress.annotations."cert-manager\.io/cluster-issuer"=letsencrypt-prod --set ingress.hostname=YOURDOMAIN --set ingress.extraTls[0].hosts[0]=YOURDOMAIN --set ingress.extraTls[0].secretName=wordpress.local-tls --set persistence.accessMode=ReadWriteMany --set persistence.storageClass=nfs --set wordpressConfigureCache=true --set memcached.enabled=true --set allowOverrideNone=true --set htaccessPersistenceEnabled=true --set mariadb.primary.persistence.storageClass=ibmc-block-gold wordpress bitnami/wordpress
 ```

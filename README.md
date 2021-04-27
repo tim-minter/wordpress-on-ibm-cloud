@@ -18,9 +18,8 @@ Feature| Basic | This solution | Enterprise Production Requirements |
 | Min memory requirements | 8Gb | 12Gb | Depends |
 | Number of worker nodes(2) | 2 (2 CPU 4GB RAM Each) | 3 (2 CPU 4GB RAM Each). | 3 (Depends) |
 
-(1) If you want to use a high performance managed database in place of the mariadb installed locally by default this relatively easy to do just by providing the
-(2) It is possible to install Wordpress on IBM Cloud on a one node cluster and it runs fine using the instructions below, but you can't scale it horizontally of course. It does mean you can start with one node and then another, and so on. Great for getting started with min cost and then scaling up! The min spec for this solution seems to be 4CPU and 32Gb RAM. If you do this, you'll need to scale down a number of deployments to 1. Check for failed deployments in the Kubernetes Dashboard 
-
+(1) If you want to use a high performance managed database in place of the mariadb installed locally by default, this is relatively easy to do just by providing the credentials and connection details in the wordpress install step below.
+(2) It is possible to install Wordpress on IBM Cloud on a one node cluster and it runs fine using the instructions below, but you can't scale it horizontally of course. It does mean you can start with one node and then another, and so on. Great for getting started with min cost and then scaling up! The min spec for this solution seems to be 4CPU and 32Gb RAM. If you do this, you'll need to scale down a number of deployments to 1. Check for failed deployments in the Kubernetes Dashboard.
 
 Wordpress with NGINX and SSL is available in the IBM Cloud catalogue however from experience it may be easier to create an equivalent Wordpress instance yourself. If you search for Wordpress SSL in the cloud catalogue you'll be presented with a setup page that requires a Virtual Machine cluster and a separate Virtual Machine. That is some significant infrastructure and may be out of your price range especially if you are just after a production ready Wordpress instance for your business. For you business site you will certainly need SSL.
 

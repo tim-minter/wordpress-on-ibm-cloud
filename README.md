@@ -6,17 +6,17 @@ I think this is great solution that allows you to start with one Wordpress node 
 
 This is how this solution compares: 
 
-Feature| Basic | This solution | Enterprise Production Requirements |
+Feature| Basic | This solution (multi worker) | This solution (single worker) | Enterprise Production Requirements |
 | --- | --- | --- | --- |
-| Wordpress up and running | Yes | Yes | Yes |
-| Secure connection from browser (SSL) | No | Yes | Yes |
-| Database | Local low performance | Local with caching (1) | Managed High performance Database |
-| Scalable | No | Yes | Yes|
-| Caching (required to handle any decent load) | No | Yes | Yes |
-| Proper High availability | No | No | Yes |
-| Min CPU requirements | 4 | 6 | Depends |
-| Min memory requirements | 8Gb | 12Gb | Depends |
-| Number of worker nodes(2) | 2 (2 CPU 4GB RAM Each) | 3 (2 CPU 4GB RAM Each). | 3 (Depends) |
+| Wordpress up and running | Yes | Yes | Yes |Yes |
+| Secure connection from browser (SSL) | No | Yes | Yes | Yes |
+| Database | Local low performance | Local with caching (1) | Local with caching (1) | Managed High performance Database |
+| Scalable | No | Yes | Yes | Yes|
+| Caching (required to handle any decent load) | No | Yes | Yes | Yes |
+| Proper High availability | No | No (but hardware fault tollerant)| No | Yes |
+| Min CPU requirements | 4 | 6 | 4 |Depends |
+| Min memory requirements | 8Gb | 12Gb | 32Gb | Depends |
+| Number of worker nodes | 2 (2 CPU 4GB RAM Each) | 3 (2 CPU 4GB RAM Each)| 4 | 3 (Depends) |
 
 (1) If you want to use a high performance managed database in place of the mariadb installed locally by default, this is relatively easy to do just by providing the credentials and connection details in the wordpress install step below.
 (2) It is possible to install Wordpress on IBM Cloud on a one node cluster and it runs fine using the instructions below, but you can't scale it horizontally of course. It does mean you can start with one node and then another, and so on. Great for getting started with min cost and then scaling up! The min spec for this solution seems to be 4CPU and 32Gb RAM. If you do this, you'll need to scale down a number of deployments to 1. Check for failed deployments in the Kubernetes Dashboard.

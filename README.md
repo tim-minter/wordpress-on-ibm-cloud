@@ -1,6 +1,6 @@
 # Installing Wordpress on IBM Cloud with NGINX, SSL and the ability to scale (low cost method)
 
-First thing's first. This is a solution to get Wordpress up and running with SSL and the ability to scale. That is pretty much what you need for a production ready system but I'm not suggesting this is an enterprise grade production version. I'd call this a minimum viable production version. Better than you get out of the box in two huge ways - SSL and scalability). An enterprise production version would be more complex and involve high availability archicture via globally dispursed infrastrucure and a load ballancer solution. 
+First thing's first. This is a solution to get Wordpress up and running with SSL and the ability to scale. That is pretty much what you need for a production ready system but I'm not suggesting this is an enterprise grade production version. I'd call this a minimum viable production version. Better than you get "out of the box" in two huge ways - SSL and scalability. An enterprise production version would be more complex and involve high availability archicture via globally disbursed infrastructure and a load ballancer solution. 
 
 I think this is great solution that allows you to start with one Wordpress node and scale horizontally by adding more nodes when you need/can afford.
 
@@ -175,6 +175,25 @@ spec:
 
 Save and close.
 
+## Scaling this solution
+So how do you scale this? Two options; manually and automatically. You'll probably want to use both options.
+
+### Manually
+You can test this out if you have a one node cluster but for it to be useful you either need a cluster with more than one node (worker) already, or you need to add one or more workers to your single worker cluster. These can be added by "resizing" you worker pool via the IBM Cloud dashboard. Note that you can only add nodes of the same size as the ones you already have. If you want to add bigger or smaller nodes, you can do this but you need to add a new worker pool. The workers in a pool all have to be the same essentially. Generally it is best to have fewer larger workers than it is to have lots of smaller ones.
+
+Once you have additional nodes you can scale your Wordpress instance by issuing the following command
+```
+kubectl scale --replicas=3 deployment/wordpress
+```
+You can watch this change in your kubernetes dashboard via the Deployments page. You can also manually change the number of pods (scale) the deployment there via the three dots menu.
+
+### Automatically
+You may want to set the min number of pods using the method above and then, in production you will want scaling to be handled for you based on load. This is where a kubernetes Horizontal Autoscaler comes in.
+Info about this can be found here for now https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
+
+On top of this, you can also have IBM Cloud automatically create/destroy workers for you so that there are workers to scale onto. To add this functionality go to the Add-ons section of your Kubernetes service in IBM Cloud.
+
+## Some important Notes
 By default the file upload limit of the ingress probably wont be sufficient which will mean you get errors when you upload anything over that limit (even though the upload limit you can see in the Wordpress dashboard will be 40Mb or similar) To change the file upload size limit go to your Kubernetes dashboard and then go to Ingresses under the Service section and locate the Wordpress ingress. Edit the ingress and add the following two lines to the annotations section.
 
 ```

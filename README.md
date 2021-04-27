@@ -102,7 +102,7 @@ helm repo add wso2 https://helm.wso2.com
 helm install stable/nfs-server-provisioner -f values.yaml --generate-name
 
 ```
-15. Install WordPress using Bitnami's Helm chart with additional parameters to integrate with Ingress and cert-manager. Replace the YOURDOMAIN placeholder with your domain name. The ciritical difference between this and the Bitnami docs is it has settings to use the nfs storage class created above. A ReadWriteMany storage optipn (like NFS) is required to enable scaling.
+14. Install WordPress using Bitnami's Helm chart with additional parameters to integrate with Ingress and cert-manager. Replace the YOURDOMAIN placeholder with your domain name. The ciritical difference between this and the Bitnami docs is it has settings to use the nfs storage class created above. A ReadWriteMany storage optipn (like NFS) is required to enable scaling.
 ```
 helm install --set service.type=ClusterIP --set ingress.enabled=true --set ingress.certManager=true --set ingress.annotations."kubernetes\.io/ingress\.class"=nginx --set ingress.annotations."cert-manager\.io/cluster-issuer"=letsencrypt-prod --set ingress.hostname=YOURDOMAIN --set ingress.extraTls[0].hosts[0]=YOURDOMAIN --set ingress.extraTls[0].secretName=wordpress.local-tls --set persistence.accessMode=ReadWriteMany --set persistence.storageClass=nfs --set wordpressConfigureCache=true --set memcached.enabled=true --set allowOverrideNone=true --set htaccessPersistenceEnabled=true --set mariadb.primary.persistence.storageClass=ibmc-block-gold wordpress bitnami/wordpress
 ```
@@ -120,10 +120,9 @@ Note: All possible settings are described here https://github.com/bitnami/charts
 Note: Stuffed up your installation and can't log on etc? Just issue ```helm uninstall wordpress```, delete the Persistant Volume Claim for the mariadb and then issue the comand above again.... that's it!
 
 
-14. Here we leave the Bitnami documentation. If your DNS update has taken effect, you should be able to connect to your Wordpress instance via your domain name now. You'll notice you have a secure connection.
 15. The cert-manager will go off to the Let's Encrypt service and generate SSL certificates for you and then manage them for you! If your DNS update hasn't taken effect yet, cert-manager can't go and make that request and you'll see an extra pod running in your Kubernetes dashboard until it can go and do this.
 16. When this all completes you should be able to access Wordpress via your domain name. It may take a while for this complete.
-17. The W3 Total Cache plugin will be installed and generally set up. Review the settings and note that memcached is set/available in the list of cacheing servers. 
+17. The W3 Total Cache plugin will be installed and generally set up. Review the settings and note that memcached is set/available in the list of caching servers. 
 18. Now what about if you want to be able to connect your Wordpress instance using www.mydomain.com as well as mydomain.com. This is a common requirement. Searching for this on the internet will return a lot of scary looking processes but in this case, basically nginx and cert-manager take care of this, you just need to add a few lines to the ingress definition....
 
 In your Kubernetes Dashboard in IBM Cloud go to the Ingresses menu under Service. Edit the Wordpress ingress. Under the Spec section you will see something like this...

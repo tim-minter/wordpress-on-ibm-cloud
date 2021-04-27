@@ -1,6 +1,6 @@
 # Installing Wordpress on IBM Cloud with NGINX, SSL and the ability to scale (low cost method)
 
-First thing's first. This is a solution to get Wordpress up and running with SSL and the ability to scale. That is pretty much what you need for a production ready system but I'm not suggesting this is an enterprise grade production version. I'd call this a minimum viable production version. Better than you get "out of the box" in two huge ways - SSL and scalability. An enterprise production version would be more complex and involve high availability archicture via globally disbursed infrastructure and a load ballancer solution. 
+First thing's first. This is a solution to get Wordpress up and running with SSL and the ability to scale. That is pretty much what you need for a production ready system but I'm not suggesting this is an enterprise grade production version. I'd call this a minimum viable production version. Better than you get "out of the box" in two huge ways - SSL and scalability. An enterprise production version would be more complex and involve high availability architecture via globally disbursed infrastructure and a load balancer solution. 
 
 I think this is great solution that allows you to start with one Wordpress node and scale horizontally by adding more nodes when you need/can afford.
 
@@ -10,7 +10,7 @@ Feature| Basic | This solution | Enterprise Production Requirements |
 | --- | --- | --- | --- |
 | Wordpress up and running | Yes | Yes | Yes |
 | Secure connection from browser (SSL) | No | Yes | Yes |
-| Database | Local low performance | Local low performance (1) | Managed High performance Database |
+| Database | Local low performance | Local with caching (1) | Managed High performance Database |
 | Scalable | No | Yes | Yes|
 | Caching (required to handle any decent load) | No | Yes | Yes |
 | Proper High availability | No | No | Yes |
@@ -18,8 +18,8 @@ Feature| Basic | This solution | Enterprise Production Requirements |
 | Min memory requirements | 8Gb | 12Gb | Depends |
 | Number of worker nodes(2) | 2 (2 CPU 4GB RAM Each) | 3 (2 CPU 4GB RAM Each). | 3 (Depends) |
 
-(1) both of these features can be added to/upgraded with this solution manually.
-(2) It is possible to install Wordpress on IBM Cloud on a one node cluster and it runs fine using the instuction below but you can't scale it horizontally of course but it dosn' mean you can start with one node and then another, and so on. Great for getting started with min cost and then scaling up! The min spec for this solution seems to be 4CPU and 32Gb RAM. If you do this, you'll need to scale down a number of deployments to 1. Check for failed deployments in the Kubernetes Dashboard 
+(1) If you want to use a high performance managed database in place of the mariadb installed locally by default this relatively easy to do just by providing the
+(2) It is possible to install Wordpress on IBM Cloud on a one node cluster and it runs fine using the instructions below, but you can't scale it horizontally of course. It does mean you can start with one node and then another, and so on. Great for getting started with min cost and then scaling up! The min spec for this solution seems to be 4CPU and 32Gb RAM. If you do this, you'll need to scale down a number of deployments to 1. Check for failed deployments in the Kubernetes Dashboard 
 
 
 Wordpress with NGINX and SSL is available in the IBM Cloud catalogue however from experience it may be easier to create an equivalent Wordpress instance yourself. If you search for Wordpress SSL in the cloud catalogue you'll be presented with a setup page that requires a Virtual Machine cluster and a separate Virtual Machine. That is some significant infrastructure and may be out of your price range especially if you are just after a production ready Wordpress instance for your business. For you business site you will certainly need SSL.
@@ -102,11 +102,11 @@ helm repo add wso2 https://helm.wso2.com
 helm install stable/nfs-server-provisioner -f values.yaml --generate-name
 
 ```
-14. Install WordPress using Bitnami's Helm chart with additional parameters to integrate with Ingress and cert-manager. Replace the YOURDOMAIN placeholder with your domain name. The ciritical difference between this and the Bitnami docs is it has settings to use the nfs storage class created above. A ReadWriteMany storage optipn (like NFS) is required to enable scaling.
+14. Install WordPress using Bitnami's Helm chart with additional parameters to integrate with Ingress and cert-manager. Replace the YOURDOMAIN placeholder with your domain name. The critical difference between this and the Bitnami docs is it has settings to use the nfs storage class created above. A ReadWriteMany storage option (like NFS) is required to enable scaling.
 ```
 helm install --set service.type=ClusterIP --set ingress.enabled=true --set ingress.certManager=true --set ingress.annotations."kubernetes\.io/ingress\.class"=nginx --set ingress.annotations."cert-manager\.io/cluster-issuer"=letsencrypt-prod --set ingress.hostname=YOURDOMAIN --set ingress.extraTls[0].hosts[0]=YOURDOMAIN --set ingress.extraTls[0].secretName=wordpress.local-tls --set persistence.accessMode=ReadWriteMany --set persistence.storageClass=nfs --set wordpressConfigureCache=true --set memcached.enabled=true --set allowOverrideNone=true --set htaccessPersistenceEnabled=true --set mariadb.primary.persistence.storageClass=ibmc-block-gold wordpress bitnami/wordpress
 ```
-Note: Setting the below options turns on db caching and installs the w3 totalcache plugin using memcached which is highly recomended. See https://github.com/bitnami/charts/tree/master/bitnami/wordpress
+Note: Setting the below options turns on db caching and installs the w3 totalcache plugin using memcached which is highly recommended. See https://github.com/bitnami/charts/tree/master/bitnami/wordpress
 ```
 --set memcached.enabled=true
 --set wordpressConfigureCache=true
@@ -117,7 +117,7 @@ This makes the .htaccess file persistent and editable by plugins. See here for m
 
 Note: All possible settings are described here https://github.com/bitnami/charts/blob/master/bitnami/wordpress/values.yaml
 
-Note: Stuffed up your installation and can't log on etc? Just issue ```helm uninstall wordpress```, delete the Persistant Volume Claim for the mariadb and then issue the comand above again.... that's it!
+Note: Stuffed up your installation and can't log on etc? Just issue ```helm uninstall wordpress```, delete the Persistent Volume Claim for the mariadb and then issue the command above again.... that's it!
 
 
 15. The cert-manager will go off to the Let's Encrypt service and generate SSL certificates for you and then manage them for you! If your DNS update hasn't taken effect yet, cert-manager can't go and make that request and you'll see an extra pod running in your Kubernetes dashboard until it can go and do this.
@@ -184,10 +184,10 @@ Once you have additional nodes you can scale your Wordpress instance by issuing 
 ```
 kubectl scale --replicas=3 deployment/wordpress
 ```
-You can watch this change in your kubernetes dashboard via the Deployments page. You can also manually change the number of pods (scale) the deployment there via the three dots menu.
+You can watch this change in your Kubernetes dashboard via the Deployments page. You can also manually change the number of pods (scale) the deployment there via the three dots menu.
 
 ### Automatically
-You may want to set the min number of pods using the method above and then, in production you will want scaling to be handled for you based on load. This is where a kubernetes Horizontal Autoscaler comes in.
+You may want to set the min number of pods using the method above and then, in production you will want scaling to be handled for you based on load. This is where a Kubernetes Horizontal Autoscaler comes in.
 Info about this can be found here for now https://kubernetes.io/docs/tasks/run-application/horizontal-pod-autoscale/
 
 On top of this, you can also have IBM Cloud automatically create/destroy workers for you so that there are workers to scale onto. To add this functionality go to the Add-ons section of your Kubernetes service in IBM Cloud.

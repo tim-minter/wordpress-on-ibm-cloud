@@ -13,7 +13,7 @@ This is how this solution compares:
 | Database | Local low performance | Local with caching (1) | Local with caching (1) | Managed High performance Database |
 | Scalable | No | Yes | Yes | Yes|
 | Caching (required to handle any decent load) | No | Yes | Yes | Yes |
-| Proper High availability | No (this is min spec and wil fail if a worker is removed) | No (but hardware fault tollerant if more workers are added or higher spec workers are used)| No | Yes |
+| Proper High availability | No (this is min spec and will likely fail if a worker is removed) | No (but hardware fault tollerant if more workers are added or higher spec workers are used)| No | Yes |
 | Min CPU requirements | 4 | 6 | 4 |Depends |
 | Min memory requirements | 8Gb | 12Gb | 32Gb | Depends |
 | Number of worker nodes(2) | 2 (2 CPU 4GB RAM Each) | 3 (2 CPU 4GB RAM Each) | 1 (4 CPU 32GB RAM) | 3 (Depends) |

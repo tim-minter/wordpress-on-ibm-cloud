@@ -1,5 +1,12 @@
 # Installing Wordpress on IBM Cloud with NGINX and SSL (low cost method)
 
+
+NOTE - As of 26/4/2021 I'm updatng this to include scaling with NFS. Please check back later.
+
+The instcutions below are currently in flux so best not t0 use them!
+
+-----------
+
 First thing's first. This is an "in-between" solution to get Wordpress up and running with SSL and good performance. A large scale (and scalable) production version is going to be more complex. This is how this solution compares: 
 
 Feature| Basic | This solution | Production Requirements |
@@ -79,11 +86,12 @@ kubectl apply -f letsencrypt-prod.yaml
 ```
 helm install cert-manager --namespace cert-manager jetstack/cert-manager --version v0.14.1
 ```
-13. Install WordPress using Bitnami's Helm chart with additional parameters to integrate with Ingress and cert-manager. Replace the YOURDOMAIN placeholder with your domain name. The ciritical difference between this and the Bitnami docs is I have added a parameter to point the correct block storage class (ReadWriteOnce) and correct file storage class (ReadWriteMany) and set the access modes correctly to allow scaling.
+13. Install NFS - [in progress - requird for rest of instructions] 
+14. Install WordPress using Bitnami's Helm chart with additional parameters to integrate with Ingress and cert-manager. Replace the YOURDOMAIN placeholder with your domain name. The ciritical difference between this and the Bitnami docs is I have added a parameter to point the correct block storage class (ReadWriteOnce) and correct file storage class (ReadWriteMany) and set the access modes correctly to allow scaling.
 ```
-helm install --set service.type=ClusterIP --set ingress.enabled=true --set ingress.certManager=true --set ingress.annotations."kubernetes\.io/ingress\.class"=nginx --set ingress.annotations."cert-manager\.io/cluster-issuer"=letsencrypt-prod --set ingress.hostname=YOURDOMAIN --set ingress.extraTls[0].hosts[0]=YOURDOMAIN --set ingress.extraTls[0].secretName=wordpress.local-tls --set wordpressConfigureCache=true --set memcached.enabled=true --set allowOverrideNone=true --set htaccessPersistenceEnabled=true --set global.storageClass=ibmc-block-gold wordpress bitnami/wordpress
+helm install --set service.type=ClusterIP --set ingress.enabled=true --set ingress.certManager=true --set ingress.annotations."kubernetes\.io/ingress\.class"=nginx --set ingress.annotations."cert-manager\.io/cluster-issuer"=letsencrypt-prod --set ingress.hostname=YOURDOMAIN --set ingress.extraTls[0].hosts[0]=YOURDOMAIN --set ingress.extraTls[0].secretName=wordpress.local-tls --set persistence.accessMode=ReadWriteMany --set persistence.storageClass=nfs --set wordpressConfigureCache=true --set memcached.enabled=true --set allowOverrideNone=true --set htaccessPersistenceEnabled=true --set mariadb.primary.persistence.storageClass=ibmc-block-gold wordpress bitnami/wordpress
 ```
-Note: Setting the below options turns on db caching and installs the w3 totalcache plugin using memcache which is highly recomended. See https://github.com/bitnami/charts/tree/master/bitnami/wordpress
+Note: Setting the below options turns on db caching and installs the w3 totalcache plugin using memcached which is highly recomended. See https://github.com/bitnami/charts/tree/master/bitnami/wordpress
 ```
 --set memcached.enabled=true
 --set wordpressConfigureCache=true
@@ -100,15 +108,8 @@ Note: Stuffed up your installation and can't log on etc? Just issue ```helm unin
 14. Here we leave the Bitnami documentation. If your DNS update has taken effect, you should be able to connect to your Wordpress instance via your domain name now. You'll notice you have a secure connection.
 15. The cert-manager will go off to the Let's Encrypt service and generate SSL certificates for you and then manage them for you! If your DNS update hasn't taken effect yet, cert-manager can't go and make that request and you'll see an extra pod running in your Kubernetes dashboard until it can go and do this.
 16. When this all completes you should be able to access Wordpress via your domain name. It may take a while for this complete.
-17. Now, although the W3 Total Cache plugin will be installed, it will be complaining that it can't edit the wp-content.php file. This is expected because the file is read only. It would also be expected that as Wordpress is running in a container, that file is "immutable". Fortunately using the --set htaccessPersistenceEnabled=true setting in the Wordpress install above the folder this file is in is stored in persistent storge! So we can edit and save it without any fancy Kubernetes work. To edit that file locate the Wordpress pod in your Kubernetes dashboard then click the 3 dots to the right of it and select Exec. This open a session inside the pod. Issue the following command to make the wp-content-php file writable 
-```
-chmod 660 /bitnami/wordpress/wp-config.php
-```
-When done remember to set it back to just writable again
-```
-chmod 755 /bitnami/wordpress/wp-config.php
-```
-Now what about if you want to be able to connect your Wordpress instance using www.mydomain.com as well as mydomain.com. This is a common requirement. Searching for this on the internet will return a lot of scary looking processes but in this case, basically nginx and cert-manager take care of this, you just need to add a few lines to the ingress definition....
+17. The W3 Total Cache plugin will be installed and generally set up. Review the settings and note that memcached is set/available in the list of cacheing servers. 
+18. Now what about if you want to be able to connect your Wordpress instance using www.mydomain.com as well as mydomain.com. This is a common requirement. Searching for this on the internet will return a lot of scary looking processes but in this case, basically nginx and cert-manager take care of this, you just need to add a few lines to the ingress definition....
 
 In your Kubernetes Dashboard in IBM Cloud go to the Ingresses menu under Service. Edit the Wordpress ingress. Under the Spec section you will see something like this...
 

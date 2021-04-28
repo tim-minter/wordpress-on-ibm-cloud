@@ -46,7 +46,7 @@ This service is provisioned on top of Kubernetes. That could put you off, howeve
 5. Ensure that classic Infrastructure is selected, change Geography to your desired deployment area and select Single Zone in the Availability drop down, then choose your worker zone (data center). As you can see, this is where you could choose to deploy your cluster across the world or across a country or continent however we will be deploying to one data center today.
 6. In the worker pool section you can select the number of workers and the size (cost) of those workers. See the table above for the min requirements. Ideally you would be creating a 3 node cluster with workers having the highest CPU count you can afford. Note that there are 3 different types of server you can select - shared, dedicated and bare metal. With dedicated and bare metal you have access to all the resources all the time. With shared servers you should/could have access to all the resources all the time but this is not guaranteed. Shared servers rely on the "neighbours" you are sharing the underlaying hardware with, not running at 100% all the time. Shared servers are the cheapest and suitable for workloads that vary, ie not workloads that run at 80-100% all the time.
 7. Give you cluster a name in the last field, check the estimated cost on the right hand side and check/adjust your workers to achieve the correct cost then click Create. The cluster creation will take some time.
-8. When the cluster build has completed add the IBM Block Storage plugin to your cluster. This storage is used by the Wordpress database later. So if you intend to connect to a managed database service instead of using the database that comes with Wordpress you don't need to add this plugin. Type "block" in the search field in the IBM Cloud dashboard and select "IBM Block Storage Plugin", select your cluster and click Create.
+8. When the cluster build has completed add the IBM Block Storage plugin to your cluster. Type "block" in the search field in the IBM Cloud dashboard and select "IBM Block Storage Plugin", select your cluster and click Create.
 9. Check/view your cluster by clicking on the Kubernetes Dashboard button from the Overview page of your cluster. Keep this dashboard open for use later. 
 10. Connect from your command line/terminal to your cluster as described in the Access page of your cluster. You need to install helm [Link](https://helm.sh/docs/intro/install/) and the IBM Cloud Command line tool (as described in the Access page), if you haven't already done this (one time process). 
 
@@ -96,9 +96,10 @@ kubectl apply -f letsencrypt-prod.yaml
 ```
 helm install cert-manager --namespace cert-manager jetstack/cert-manager --version v0.14.1
 ```
-18. Install NFS server
+18. Now we get the requirements for scalability. Storage that supports ReadWriteMany (RWX) access is a requirement for this. Block Storage (we added the block storage plugin earlier) doesn't support this natively. It took a lot of trial and error to find a simple solution to this and essentially one (there may be more) solution is to install a NFS file server on your cluster which then provides NFS access (which supports RWX) to one of the IBM Kubernetes block storage classes. In the case below I have chosen the "ibmc-block-gold" storage class. This is the fastest available storage (there are also ibmc-block-bronze and ibmc-block-silver classes that provide access to slightly cheaper storage).
+19. Install a NFS server via the following process:
 
-Create a file called values.yaml. Paste the following into the file and save.
+Create a file called values.yaml in your local machine. Paste the following into the file and save.
 ```
 persistence:
   enabled: true
@@ -115,18 +116,22 @@ helm repo add wso2 https://helm.wso2.com
 helm install stable/nfs-server-provisioner -f values.yaml --generate-name
 
 ```
-19. Install WordPress using Bitnami's Helm chart with additional parameters to integrate with Ingress and cert-manager. Replace the YOURDOMAIN placeholder with your domain name. The critical difference between this and the Bitnami docs is it has settings to use the nfs storage class created above. A ReadWriteMany storage option (like NFS) is required to enable scaling.
+19. Install WordPress using Bitnami's Helm chart with additional parameters to integrate with Ingress and cert-manager. Replace the YOURDOMAIN placeholder with your domain name. There are critical differences between this command and the command in the Bitnami docs. The differences set the persitent storage class (for worpdress files) to use the NFS server created above, set the wordpress database to use the ibmc-block-gold storage class and enable caching properly which is absolutely critical to the overall performamce of Wordpress.
+
 ```
 helm install --set service.type=ClusterIP --set ingress.enabled=true --set ingress.certManager=true --set ingress.annotations."kubernetes\.io/ingress\.class"=nginx --set ingress.annotations."cert-manager\.io/cluster-issuer"=letsencrypt-prod --set ingress.hostname=YOURDOMAIN --set ingress.extraTls[0].hosts[0]=YOURDOMAIN --set ingress.extraTls[0].secretName=wordpress.local-tls --set persistence.accessMode=ReadWriteMany --set persistence.storageClass=nfs --set wordpressConfigureCache=true --set memcached.enabled=true --set allowOverrideNone=true --set htaccessPersistenceEnabled=true --set mariadb.primary.persistence.storageClass=ibmc-block-gold wordpress bitnami/wordpress
 ```
-Note: Setting the below options turns on db caching and installs the w3 totalcache plugin using memcached which is highly recommended. See https://github.com/bitnami/charts/tree/master/bitnami/wordpress
+## Notes on some of the settings in the command above:
+Setting these options turns on db caching and installs the w3 totalcache plugin using memcached which is highly recommended. See https://github.com/bitnami/charts/tree/master/bitnami/wordpress
+
 ```
 --set memcached.enabled=true
 --set wordpressConfigureCache=true
 ```
 
+Setting this option makes the .htaccess file persistent and editable by plugins. See here for more into and if you should do this or not https://docs.bitnami.com/kubernetes/apps/wordpress/configuration/understand-htaccess/
+
 ```--set htaccessPersistenceEnabled=true``` 
-This makes the .htaccess file persistent and editable by plugins. See here for more into and if you should do this or not https://docs.bitnami.com/kubernetes/apps/wordpress/configuration/understand-htaccess/
 
 Note: All possible settings are described here https://github.com/bitnami/charts/blob/master/bitnami/wordpress/values.yaml
 

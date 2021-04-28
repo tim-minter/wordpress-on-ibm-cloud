@@ -8,7 +8,7 @@ This is how this solution compares:
 
 | Feature | Basic | This solution (multi worker) | This solution (single worker) | Enterprise Production Requirements |
 | --- | --- | --- | --- | --- |
-| Wordpress up and running | Yes | Yes | Yes |Yes |
+| Link to instructions | [Link](https://cloud.ibm.com/catalog/content/wordpress::1-Qml0bmFtaS13b3JkcHJlc3M=-global) | See below | See below | [Link](https://cloud.ibm.com/catalog/content/wordpresspro-Qml0bmFtaS13b3JkcHJlc3Nwcm8=-global) |
 | Secure connection from browser (SSL) | No | Yes | Yes | Yes |
 | Database | Local low performance | Local with caching (1) | Local with caching (1) | Managed High performance Database |
 | Scalable | No | Yes | Yes | Yes|

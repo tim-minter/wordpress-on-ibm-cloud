@@ -50,7 +50,7 @@ This service is provisioned on top of Kubernetes. That could put you off, howeve
 9. Check/view your cluster by clicking on the Kubernetes Dashboard button from the Overview page of your cluster. Keep this dashboard open for use later. 
 10. Connect from your command line/terminal to your cluster as described in the Access page of your cluster. You need to install helm [Link](https://helm.sh/docs/intro/install/) and the IBM Cloud Command line tool (as described in the Access page), if you haven't already done this (one time process). 
 
-The following steps 8 to 13 are taken from, or modified from the Bitnami documentation here https://docs.bitnami.com/tutorials/secure-wordpress-kubernetes-managed-database-ssl-upgrades/ 
+The following steps 11 to 17 are taken from, or modified from the Bitnami documentation here https://docs.bitnami.com/tutorials/secure-wordpress-kubernetes-managed-database-ssl-upgrades/ 
 
 11. Install the NGINX ingress controller
 ```

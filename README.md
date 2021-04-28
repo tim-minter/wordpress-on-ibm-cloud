@@ -116,7 +116,7 @@ helm repo add wso2 https://helm.wso2.com
 helm install stable/nfs-server-provisioner -f values.yaml --generate-name
 
 ```
-19. Install WordPress using Bitnami's Helm chart with additional parameters to integrate with Ingress and cert-manager. Replace the YOURDOMAIN placeholder with your domain name. There are critical differences between this command and the command in the Bitnami docs. The differences set the persitent storage class (for worpdress files) to use the NFS server created above, set the wordpress database to use the ibmc-block-gold storage class and enable caching properly which is absolutely critical to the overall performamce of Wordpress.
+19. Install WordPress using Bitnami's Helm chart with additional parameters to integrate with Ingress and cert-manager. Replace the YOURDOMAIN placeholder with your domain name. There are critical differences between this command and the command in the Bitnami docs. The differences set the persistent storage class (for Wordpress files) to use the NFS server created above, set the Wordpress database to use the ibmc-block-gold storage class and enable caching properly which is absolutely critical to the overall performance of Wordpress.
 
 ```
 helm install --set service.type=ClusterIP --set ingress.enabled=true --set ingress.certManager=true --set ingress.annotations."kubernetes\.io/ingress\.class"=nginx --set ingress.annotations."cert-manager\.io/cluster-issuer"=letsencrypt-prod --set ingress.hostname=YOURDOMAIN --set ingress.extraTls[0].hosts[0]=YOURDOMAIN --set ingress.extraTls[0].secretName=wordpress.local-tls --set persistence.accessMode=ReadWriteMany --set persistence.storageClass=nfs --set wordpressConfigureCache=true --set memcached.enabled=true --set allowOverrideNone=true --set htaccessPersistenceEnabled=true --set mariadb.primary.persistence.storageClass=ibmc-block-gold wordpress bitnami/wordpress
@@ -135,7 +135,8 @@ Setting this option makes the .htaccess file persistent and editable by plugins.
 
 Note: All possible settings are described here https://github.com/bitnami/charts/blob/master/bitnami/wordpress/values.yaml
 
-Note: Stuffed up your installation and can't log on etc? Just issue ```helm uninstall wordpress```, delete the Persistent Volume Claim for the mariadb and then issue the command above again.... that's it!
+Note: Stuffed up your installation and can't log on etc? Just issue ```helm uninstall wordpress```, delete the Persistent Volume Claim for the mariadb and then issue the command above again.... that's it! 
+
 
 
 20. The cert-manager will go off to the Let's Encrypt service and generate SSL certificates for you and then manage them for you! If your DNS update hasn't taken effect yet, cert-manager can't go and make that request and you'll see an extra pod running in your Kubernetes dashboard until it can go and do this.

@@ -212,6 +212,7 @@ Info about this can be found here for now https://kubernetes.io/docs/tasks/run-a
 On top of this, you can also have IBM Cloud automatically create/destroy workers for you so that there are workers to scale onto. To add this functionality go to the Add-ons section of your Kubernetes service in IBM Cloud.
 
 ## Some important Notes
+### File Upload Limit Errors
 By default the file upload limit of the ingress probably wont be sufficient which will mean you get errors when you upload anything over that limit (even though the upload limit you can see in the Wordpress dashboard will be 40Mb or similar) To change the file upload size limit go to your Kubernetes dashboard and then go to Ingresses under the Service section and locate the Wordpress ingress. Edit the ingress and add the following two lines to the annotations section.
 
 ```
@@ -244,3 +245,43 @@ spec:
           servicePort: <BACKEND_SERVICE_PORT>
         path: /
    ```     
+### Reset admin/user password
+
+There are a load of ways to do this, however by far the quickest and most painless I found was simply to launch the "exec" console on the wordpress pod within the Kubernetes dashboard. The same "way in" can be achieved using the kubectl command line.
+Once "in" the pod you basically see something like what you'd see if Wordpress was running on a single server. Changing things inside a Kubernetes pod is not necessarily a good thing to do because your change will likely be overwritten as only specific storage is persistent. What you are seeing is the contents of an image (the pod contents will be recreated from this image - stored in a repository somewhere, every time the pod is destroyed and created again - which could be regularly). In the case of Worpdress on Kubernetes the only storage that is persistent is the database. The command we are going to run just updates that databaase though so we're all good!
+
+Once connected to the console of the pod (via the Kubernetes dashboard UI or shh) and issuing a ls command you see the following...
+
+```I have no name!@wordpress-766c568f5:/$ ls
+apache-init.sh      bin      build  home   media                     opt           proc  sbin  tmp  wordpress-init.sh
+apache-inputs.json  bitnami  dev    lib    mnt                       post-init.d   root  srv   usr  wordpress-inputs.json
+app-entrypoint.sh   boot     etc    lib64  mysql-client-inputs.json  post-init.sh  run   sys   var
+```
+All the expected Wordpress stuff is inside the bitmani folder
+
+```I have no name!@wordpress-766c568f5:/$ cd bitnami/
+I have no name!@wordpress-766c568f5:/bitnami$ ls
+apache  gosu  libphp  php  tini  wordpress  wp-cli
+I have no name!@wordpress-766c568f5:/bitnami$ cd wordpress/
+I have no name!@wordpress-766c568f5:/bitnami/wordpress$ ls
+wp-config.php  wp-content
+```
+Here we can use the ```wp``` command like we would on a server
+
+```I have no name!@wordpress-766c568f5:/bitnami/wordpress$ wp user list
++----+------------+--------------+------------------+---------------------+---------------+
+| ID | user_login | display_name | user_email       | user_registered     | roles         |
++----+------------+--------------+------------------+---------------------+---------------+
+| 1  | user       | user         | user@example.com | 2021-04-01 15:48:41 | administrator |
++----+------------+--------------+------------------+---------------------+---------------+
+```
+To update the password of the admin user, locate its ID (1 in the case above) and issue the command below using your own password of course
+
+```I have no name!@wordpress-766c568f5:/bitnami/wordpress$ wp user update 1 --user_pass=newpasswordhere        
+sh: 1: /usr/sbin/sendmail: not found
+Success: Updated user 1.
+I have no name!@wordpress-766c568f5:/bitnami/wordpress$
+```
+The line
+```sh: 1: /usr/sbin/sendmail: not found```
+is expeced because, initially, mailing is not configured.

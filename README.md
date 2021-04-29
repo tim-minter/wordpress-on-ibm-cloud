@@ -247,8 +247,8 @@ spec:
    ```     
 ### Reset admin/user password
 
-There are a load of ways to do this, however by far the quickest and most painless I found was simply to launch the "exec" console on the wordpress pod within the Kubernetes dashboard. The same "way in" can be achieved using the kubectl command line.
-Once "in" the pod you basically see something like what you'd see if Wordpress was running on a single server. Changing things inside a Kubernetes pod is not necessarily a good thing to do because your change will likely be overwritten as only specific storage is persistent. What you are seeing is the contents of an image (the pod contents will be recreated from this image - stored in a repository somewhere, every time the pod is destroyed and created again - which could be regularly). In the case of Worpdress on Kubernetes the only storage that is persistent is the database. The command we are going to run just updates that databaase though so we're all good!
+Connect to a Wordpress pod either by launching the "exec" console on the wordpress pod within the Kubernetes dashboard or by using the kubectl command line. 
+Once "in" the pod you basically see something like what you'd see if Wordpress was running on a single server. Change directory to the /bitnami/wordpress folder. The command we are going to run just updates the database.
 
 Once connected to the console of the pod (via the Kubernetes dashboard UI or shh) and issuing a ls command you see the following...
 
@@ -285,3 +285,19 @@ I have no name!@wordpress-766c568f5:/bitnami/wordpress$
 The line
 ```sh: 1: /usr/sbin/sendmail: not found```
 is expeced because, initially, mailing is not configured.
+
+### Modifying Wordpress files eg wp-admin.php
+
+I've not had to do this in practice once I'd figured out the the RWX persistent storage issues and got my cluster running as above, so this info is included here just as an FYI... 
+
+Connect to a Wordpress pod using the method above or the kubctl command line.
+Once "in" the pod you basically see something like what you'd see if Wordpress was running on a single server. The /bitnami/wordpress folder is mounted to persistent storage so we can modify the contents of this folder. 
+
+Once connected to the console of the pod (via the Kubernetes dashboard UI or shh) and issuing a ls command you see the following...
+
+```I have no name!@wordpress-766c568f5:/$ ls
+apache-init.sh      bin      build  home   media                     opt           proc  sbin  tmp  wordpress-init.sh
+apache-inputs.json  bitnami  dev    lib    mnt                       post-init.d   root  srv   usr  wordpress-inputs.json
+app-entrypoint.sh   boot     etc    lib64  mysql-client-inputs.json  post-init.sh  run   sys   var
+```
+All the expected Wordpress stuff is inside the bitmani folder. Here you can update permissions (to allow plugins to edit them if you get errors about that) on the files and view them (via the cat command). If you want to edit the files that is a different matter because there is no editor such as nano or vi available in the pod. You'll need to Google that.

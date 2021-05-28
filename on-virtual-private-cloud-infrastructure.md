@@ -79,6 +79,7 @@ helm install kvaps/nfs-server-provisioner -f values.yaml --generate-name
 
 ```
 19. Install WordPress using Bitnami's Helm chart with additional parameters to integrate with Ingress and cert-manager. Replace the YOURDOMAIN placeholder with your domain name. There are critical differences between this command and the command in the Bitnami docs. The differences set the persistent storage class (for Wordpress files) to use the NFS server created above, set the Wordpress database to use the (1)ibmc-vpc-block-retain-general-purpose storage class and enable caching properly which is absolutely critical to the overall performance of Wordpress.
+
 (1) Note that a number of different storage classes are available (see the Storage Classes section of the Kubernetes dashboard). Investigate the options and choose the correct one for your purposes. Higher IOPS are faster but cost more. Here we have chosen a general purpose class "ibmc-vpc-block-retain-general-purpose".
 
 ```

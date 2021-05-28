@@ -7,7 +7,7 @@
 5. Ensure that VPC Infrastructure is selected, change Geography to your desired deployment area and select Single Zone in the Availability drop down, then choose your worker zone (data center). As you can see, this is where you could choose to deploy your cluster across the world or across a country or continent however we will be deploying to one data center today.
 6. In the worker pool section you can select the number of workers and the size (cost) of those workers. See the table above for the min requirements. Ideally you would be creating a 3 node cluster with workers having the highest CPU count you can afford. Note that there are 3 different types of server you can select - shared, dedicated and bare metal. With dedicated and bare metal you have access to all the resources all the time. With shared servers you should/could have access to all the resources all the time but this is not guaranteed. Shared servers rely on the "neighbours" you are sharing the underlaying hardware with, not running at 100% all the time. Shared servers are the cheapest and suitable for workloads that vary, ie not workloads that run at 80-100% all the time.
 7. Give you cluster a name in the last field, check the estimated cost on the right hand side and check/adjust your workers to achieve the correct cost then click Create. The cluster creation will take some time.
-8. When the cluster build has completed add the IBM Block Storage plugin to your cluster. Type "block" in the search field in the IBM Cloud dashboard and select "IBM Block Storage Plugin", select your cluster and click Create.
+8. If not already installed, install the Block Storage for VPC plugin via the Getting Started page for your cluster.
 9. Check/view your cluster by clicking on the Kubernetes Dashboard button from the Overview page of your cluster. Keep this dashboard open for use later. 
 10. Connect from your command line/terminal to your cluster as described in the Access page of your cluster. You need to install helm [Link](https://helm.sh/docs/intro/install/) and the IBM Cloud Command line tool (as described in the Access page), if you haven't already done this (one time process). 
 
@@ -61,10 +61,11 @@ helm install cert-manager --namespace cert-manager jetstack/cert-manager --versi
 19. Install a NFS server via the following process:
 
 Create a file called values.yaml in your local machine. Paste the following into the file and save.
+Note that a number of different storage classes are available (see the Storage Classes section of the Kubernetes dashboard). Investigate the options and choose the correct one for your purposes. Higher IOPS are faster but cost more. Here we have chosen a general purpose class "ibmc-vpc-block-retain-general-purpose".
 ```
 persistence:
   enabled: true
-  storageClass: "ibmc-block-gold"
+  storageClass: "ibmc-vpc-block-retain-general-purpose"
   size: 20Gi
 
 storageClass:
@@ -77,10 +78,11 @@ helm repo add kvaps https://kvaps.github.io/charts
 helm install kvaps/nfs-server-provisioner -f values.yaml --generate-name
 
 ```
-19. Install WordPress using Bitnami's Helm chart with additional parameters to integrate with Ingress and cert-manager. Replace the YOURDOMAIN placeholder with your domain name. There are critical differences between this command and the command in the Bitnami docs. The differences set the persistent storage class (for Wordpress files) to use the NFS server created above, set the Wordpress database to use the ibmc-block-gold storage class and enable caching properly which is absolutely critical to the overall performance of Wordpress.
+19. Install WordPress using Bitnami's Helm chart with additional parameters to integrate with Ingress and cert-manager. Replace the YOURDOMAIN placeholder with your domain name. There are critical differences between this command and the command in the Bitnami docs. The differences set the persistent storage class (for Wordpress files) to use the NFS server created above, set the Wordpress database to use the (1)ibmc-vpc-block-retain-general-purpose storage class and enable caching properly which is absolutely critical to the overall performance of Wordpress.
+(1) Note that a number of different storage classes are available (see the Storage Classes section of the Kubernetes dashboard). Investigate the options and choose the correct one for your purposes. Higher IOPS are faster but cost more. Here we have chosen a general purpose class "ibmc-vpc-block-retain-general-purpose".
 
 ```
-helm install --set service.type=ClusterIP --set ingress.enabled=true --set ingress.certManager=true --set ingress.annotations."kubernetes\.io/ingress\.class"=nginx --set ingress.annotations."cert-manager\.io/cluster-issuer"=letsencrypt-prod --set ingress.hostname=YOURDOMAIN --set ingress.extraTls[0].hosts[0]=YOURDOMAIN --set ingress.extraTls[0].secretName=wordpress.local-tls --set persistence.accessMode=ReadWriteMany --set persistence.storageClass=nfs --set wordpressConfigureCache=true --set memcached.enabled=true --set allowOverrideNone=true --set htaccessPersistenceEnabled=true --set mariadb.primary.persistence.storageClass=ibmc-block-gold wordpress bitnami/wordpress
+helm install --set service.type=ClusterIP --set ingress.enabled=true --set ingress.certManager=true --set ingress.annotations."kubernetes\.io/ingress\.class"=nginx --set ingress.annotations."cert-manager\.io/cluster-issuer"=letsencrypt-prod --set ingress.hostname=YOURDOMAIN --set ingress.extraTls[0].hosts[0]=YOURDOMAIN --set ingress.extraTls[0].secretName=wordpress.local-tls --set persistence.accessMode=ReadWriteMany --set persistence.storageClass=nfs --set wordpressConfigureCache=true --set memcached.enabled=true --set allowOverrideNone=true --set htaccessPersistenceEnabled=true --set mariadb.primary.persistence.storageClass=ibmc-vpc-block-retain-general-purpose wordpress bitnami/wordpress
 ```
 
 Instructions on how to get the Wordpress admin password are provided when the above command completes.

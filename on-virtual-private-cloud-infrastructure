@@ -121,6 +121,11 @@ helm install kvaps/nfs-server-provisioner -f values.yaml --generate-name
 ```
 helm install --set service.type=ClusterIP --set ingress.enabled=true --set ingress.certManager=true --set ingress.annotations."kubernetes\.io/ingress\.class"=nginx --set ingress.annotations."cert-manager\.io/cluster-issuer"=letsencrypt-prod --set ingress.hostname=YOURDOMAIN --set ingress.extraTls[0].hosts[0]=YOURDOMAIN --set ingress.extraTls[0].secretName=wordpress.local-tls --set persistence.accessMode=ReadWriteMany --set persistence.storageClass=nfs --set wordpressConfigureCache=true --set memcached.enabled=true --set allowOverrideNone=true --set htaccessPersistenceEnabled=true --set mariadb.primary.persistence.storageClass=ibmc-block-gold wordpress bitnami/wordpress
 ```
+
+Instructions on how to get the Wordpress admin password are provided when the above command completes.
+Do please note that if your DNS update hasn't taken effect yet, cert-manager can't go and make that request and you'll see an extra pod running in your Kubernetes dashboard (called something like cm-acme-http-solver-xxxx) until it can go and do this. 
+NOTE: It can takes ages for a DNS update to take effect so don't worry, you may have to wait a few hours until you can connect to your Wordpress instance.
+
 ## Notes on some of the settings in the command above:
 Setting these options turns on db caching and installs the w3 totalcache plugin using memcached which is highly recommended. See https://github.com/bitnami/charts/tree/master/bitnami/wordpress
 
@@ -139,7 +144,7 @@ Note: Stuffed up your installation and can't log on etc? Just issue ```helm unin
 
 
 
-20. The cert-manager will go off to the Let's Encrypt service and generate SSL certificates for you and then manage them for you! If your DNS update hasn't taken effect yet, cert-manager can't go and make that request and you'll see an extra pod running in your Kubernetes dashboard until it can go and do this.
+20. The cert-manager will go off to the Let's Encrypt service and generate SSL certificates for you and then manage them for you! If your DNS update hasn't taken effect yet, cert-manager can't go and make that request and you'll see an extra pod running in your Kubernetes dashboard (called something like cm-acme-http-solver-xxxx) until it can go and do this. NOTE: It can takes ages for a DNS update to take effect so don't worry, you may have to wait a few hours.
 21. When this all completes you should be able to access Wordpress via your domain name. It may take a while for this complete.
 22. The W3 Total Cache plugin will be installed and generally set up. Review the settings and note that memcached is set/available in the list of caching servers. 
 23. Now what about if you want to be able to connect your Wordpress instance using www.mydomain.com as well as mydomain.com. This is a common requirement. Searching for this on the internet will return a lot of scary looking processes but in this case, basically nginx and cert-manager take care of this, you just need to add a few lines to the ingress definition....

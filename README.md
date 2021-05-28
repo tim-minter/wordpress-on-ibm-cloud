@@ -1,6 +1,6 @@
 # Installing Wordpress on IBM Cloud with NGINX, SSL and the ability to scale (low cost method)
 
-First thing's first. This is a solution to get Wordpress up and running with SSL and the ability to scale. That is pretty much what you need for a production ready system. So I'd call this a viable production version. Better than you get "out of the box" in two huge ways - SSL and scalability. An enterprise production version would be more complex and involve high availability architecture via globally disbursed infrastructure and a load balancer solution, all of which increase the cost dramatically. 
+First thing's first. This is a solution to get Wordpress up and running with SSL and the ability to scale. That is pretty much what you need for a medium size production ready system. So I'd call this a "minimum viable production" version. This is better than you get "out of the box", in two huge ways - SSL and scalability. Do please note that an enterprise production version would be more complex and involve high availability architecture via globally disbursed infrastructure and a load balancer solution, all of which increase the cost dramatically. 
 
 I think this is great solution that allows you to start with one Wordpress node and scale horizontally by adding more nodes when you need/can afford.
 

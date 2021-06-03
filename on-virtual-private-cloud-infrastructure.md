@@ -22,7 +22,7 @@ helm install ingress bitnami/nginx-ingress-controller
 ```
 kubectl get svc ingress-nginx-ingress-controller
 ```
-13. Configure the DNS for your domain name by adding a CNAME record pointing to the address obtained above (eg abc123-eu-gb.lb.appdomain.cloud). This may take a few minutes or a few hours to take effect
+13. Configure the DNS for your domain name by adding a CNAME record pointing to the address obtained above (eg abc123-eu-gb.lb.appdomain.cloud). This may take a few minutes or a few hours to take effect (up to 24 hours).
 
 14. Add the cert-manager repository, create a namespace and create CRDs. New versions are released al the time so it's worth checking for the latest version. Go to https://github.com/jetstack/cert-manager and look at the "Releases" section on the right hand side of the page. The instruction below assumes v1.3.1 is the latest version. 
 ```
@@ -108,7 +108,7 @@ Note: Stuffed up your installation and can't log on etc? Just issue ```helm unin
 
 
 
-20. The cert-manager will go off to the Let's Encrypt service and generate SSL certificates for you and then manage them for you! If your DNS update hasn't taken effect yet, cert-manager can't go and make that request and you'll see an extra pod running in your Kubernetes dashboard (called something like cm-acme-http-solver-xxxx) until it can go and do this. NOTE: It can takes ages for a DNS update to take effect so don't worry, you may have to wait a few hours.
+20. The cert-manager will go off to the Let's Encrypt service and generate SSL certificates for you and then manage them for you! If your DNS update hasn't taken effect yet, cert-manager can't go and make that request and you'll see an extra pod running in your Kubernetes dashboard (called something like cm-acme-http-solver-xxxx) until it can go and do this. NOTE: It can take ages for a update to take effect so don't worry, you may have to wait a few hours.
 21. When this all completes you should be able to access Wordpress via your domain name. It may take a while for this complete.
 22. The W3 Total Cache plugin will be installed and generally set up. Review the settings and note that memcached is set/available in the list of caching servers. 
 23. Now what about if you want to be able to connect your Wordpress instance using www.mydomain.com as well as mydomain.com. This is a common requirement. Searching for this on the internet will return a lot of scary looking processes but in this case, basically nginx and cert-manager take care of this, you just need to add a few lines to the ingress definition....

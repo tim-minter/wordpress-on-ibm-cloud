@@ -34,13 +34,13 @@ What I ended up doing, I believe, is creating the equivalent of the Wordpress wi
 This service is provisioned on top of Kubernetes. That could put you off, however there are significant advantanges to running Wordpress on Kubernetes, as opposed to running on it on your own server:
 1. There are no Windows or Linux servers to look after, secure, patch or fix if something crashes. 
 2. If a new version of Kubernetes comes along you can perform an update with a couple of clicks from the Kubernetes Dashboard. This can happen without interuption to your service if you have spare capacity on your workers (or add a worker for this purpose during the update process).
-3. Your system can be horizontally scaled (easily) or verically scaled (fairly easily) and this can be automatic. 
+3. Your system can be horizontally scaled (easily) or vertically scaled (fairly easily) and this can be automatic. 
 4. Upgrading Wordpress itself can be done via a simple command.
 
 
 There are two ways to install this on IBM Cloud.
 
 1. Using Classic infrastructure [here](https://github.com/tim-minter/wordpress-on-ibm-cloud/blob/main/on-classic-infrastructure.md)
-2. Using Virtual Private Cloud infrastructure (recommended) [here](https://github.com/tim-minter/wordpress-on-ibm-cloud/blob/main/on-virtual-private-cloud-infrastructure.md)
+2. ** Using Virtual Private Cloud infrastructure (recommended) [here](https://github.com/tim-minter/wordpress-on-ibm-cloud/blob/main/on-virtual-private-cloud-infrastructure.md)
 
-The second option is recommended but I'm still working on these intructions as of 28/5/21. Currently they work but I havn't ironed out how to to connect into the wordpress instance via the load balancer.
+** The second option is recommended but I'm still working on these intructions as of 28/5/21. Currently they work but I havn't ironed out how to to connect into the wordpress instance via the load balancer.
